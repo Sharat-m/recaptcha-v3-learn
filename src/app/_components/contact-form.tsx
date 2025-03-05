@@ -2,6 +2,8 @@
 
 import type { FormEvent } from "react";
 import toast from "react-hot-toast";
+import { contactUsAction } from "../action";
+import { getCaptchaToken } from "../../utils/captcha";
 
 export function ContactForm() {
   async function handleSubmit(e: FormEvent) {
@@ -12,11 +14,25 @@ export function ContactForm() {
 
     const loadingToast = toast.loading("Sending message...");
 
-    setTimeout(() => {
-      toast.dismiss(loadingToast);
-      toast.success("Message sent successfully!");
+    const token = await getCaptchaToken();
+    console.log({ token });
+
+    const res = await contactUsAction(token, formData);
+    toast.dismiss(loadingToast);
+
+    if (res.success) {
+      // toast.success("Message sent successfully!");
+      toast.success(res.message);
       form.reset();
-    }, 2000);
+    }else {
+      toast.error(res.message);
+    }
+
+    // setTimeout(() => {
+    //   toast.dismiss(loadingToast);
+    //   toast.success("Message sent successfully!");
+    //   form.reset();
+    // }, 2000);
   }
 
   return (
