@@ -2,7 +2,7 @@
 
 import { verifyCaptchaToken } from "../utils/captcha";
 
-export async function contactUsAction(token: string | null, formData: FormData) {
+export async function sendOtpAction(token: string | null, phone: string) {
   if (!token) {
     return {
       success: false,
