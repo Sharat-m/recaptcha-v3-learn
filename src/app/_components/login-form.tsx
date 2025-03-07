@@ -7,10 +7,18 @@ import { sendOtpAction } from "../action";
 import { getCaptchaToken } from "../../utils/captcha";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { auth } from "../../utils/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+
+// Extend Window object to include recaptchaVerifier
+declare global {
+  interface Window {
+    recaptchaVerifier: any;
+  }
+}
 
 export function LoginForm() {
-  // const [phone, setPhone] = useState("");
-  const [phone, setPhone] = useState(() => "");
+  const [phone, setPhone] = useState("");
   const router = useRouter();
 
   async function handleSubmit(e: FormEvent) {
@@ -25,15 +33,29 @@ export function LoginForm() {
     const token = await getCaptchaToken();
     console.log({ token });
 
-    const res = await sendOtpAction(token, phone);
-    toast.dismiss(loadingToast);
+    // Log phone number and token on the client side
+    console.log("Phone Number:", phone);
+    console.log("reCAPTCHA Token:", token);
 
-    if (res.success) {
-      toast.success(res.message);
+    try {
+      // Create reCAPTCHA verifier
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+        size: "invisible",
+        callback: (response: any) => {
+          console.log("reCAPTCHA solved", response);
+        },
+      });
+
+      const confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+      console.log("OTP Sent Successfully", confirmationResult);
+      toast.success("OTP Sent Successfully!");
       router.push("/dashboard");
-    } else {
-      toast.error(res.message);
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      toast.error("Failed to send OTP");
     }
+
+    toast.dismiss(loadingToast);
   }
 
   return (
@@ -46,6 +68,7 @@ export function LoginForm() {
         onChange={(e) => setPhone(e.target.value)}
         className="p-2.5 text-lg w-full rounded-md border border-gray-300"
       />
+      <div id="recaptcha-container"></div>
       <button
         type="submit"
         className="text-lg w-full bg-blue-800 text-white rounded-md p-2.5"
