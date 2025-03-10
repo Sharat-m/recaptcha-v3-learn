@@ -8,7 +8,11 @@ import { getCaptchaToken } from "../../utils/captcha";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "../../utils/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber, signOut } from "firebase/auth";
+import {
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  signOut,
+} from "firebase/auth";
 
 // Extend Window object to include recaptchaVerifier
 declare global {
@@ -38,22 +42,25 @@ export function LoginForm() {
     console.log("reCAPTCHA Token:", token);
 
     try {
-      // Create reCAPTCHA verifier
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "invisible",
-          callback: (response: any) => {
-            console.log("reCAPTCHA solved", response);
-          },
-        }
-      );
+      if (!window.recaptchaVerifier) {
+        // Create reCAPTCHA verifier
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "invisible",
+            callback: (response: any) => {
+              console.log("reCAPTCHA solved", response);
+            },
+          }
+        );
+      }
 
+      const appVerifier = window.recaptchaVerifier;
       window.confirmationResult = await signInWithPhoneNumber(
         auth,
         phone,
-        window.recaptchaVerifier
+        appVerifier
       );
       console.log("OTP Sent Successfully", window.confirmationResult);
       toast.success("OTP Sent Successfully!");
