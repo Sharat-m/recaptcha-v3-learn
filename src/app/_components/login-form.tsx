@@ -14,6 +14,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 declare global {
   interface Window {
     recaptchaVerifier: any;
+    confirmationResult: any;
   }
 }
 
@@ -31,7 +32,6 @@ export function LoginForm() {
 
     const loadingToast = toast.loading("Verifying... ");
     const token = await getCaptchaToken();
-    console.log({ token });
 
     // Log phone number and token on the client side
     console.log("Phone Number:", phone);
@@ -39,17 +39,26 @@ export function LoginForm() {
 
     try {
       // Create reCAPTCHA verifier
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-        callback: (response: any) => {
-          console.log("reCAPTCHA solved", response);
-        },
-      });
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+          size: "invisible",
+          callback: (response: any) => {
+            console.log("reCAPTCHA solved", response);
+          },
+        }
+      );
 
-      const confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
-      console.log("OTP Sent Successfully", confirmationResult);
+      window.confirmationResult = await signInWithPhoneNumber(
+        auth,
+        phone,
+        window.recaptchaVerifier
+      );
+      console.log("OTP Sent Successfully", window.confirmationResult);
       toast.success("OTP Sent Successfully!");
-      router.push("/dashboard");
+      // router.push("/dashboard");
+      router.push("/verify-otp");
     } catch (error) {
       console.error("Error sending OTP:", error);
       toast.error("Failed to send OTP");
