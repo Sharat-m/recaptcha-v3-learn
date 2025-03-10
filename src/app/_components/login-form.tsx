@@ -8,7 +8,7 @@ import { getCaptchaToken } from "../../utils/captcha";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "../../utils/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { RecaptchaVerifier, signInWithPhoneNumber, signOut } from "firebase/auth";
 
 // Extend Window object to include recaptchaVerifier
 declare global {
