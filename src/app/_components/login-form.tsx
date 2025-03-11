@@ -3,7 +3,7 @@
 
 import type { FormEvent } from "react";
 import toast from "react-hot-toast";
-import { sendOtpAction } from "../action";
+// import { sendOtpAction } from "../action";
 import { getCaptchaToken } from "../../utils/captcha";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ import { auth } from "../../utils/firebase";
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  signOut,
+  // signOut,
 } from "firebase/auth";
 
 // Extend Window object to include recaptchaVerifier
